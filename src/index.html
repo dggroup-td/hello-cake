@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hello Cake — Bánh Tươi Handmade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="topbar"><div class="i"><span>📍 Toà S2.15 Ocean Park 1, Hà Nội &nbsp;·&nbsp; 📞 <strong>0869.120.122</strong></span><div style="display:flex;gap:14px"><span>🕐 09:00–22:30</span><span>·</span><span>🚀 Ship từ 2 chiếc</span></div></div></div>
+
+<header class="hdr"><div class="i">
+  <a class="logo" href="#" onclick="gHome();return false"><div class="logo-icon"><span class="logo-cake">🎂</span></div><div class="logo-text"><div class="logo-n"><em>Hello Cake</em><span class="logo-hand">✋</span></div><div class="logo-s">Ngon mê ly</div></div></a>
+  <div class="hpols">
+    <div class="hp"><div class="hp-i"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div><div class="hp-t">Giao hàng toàn quận</div><div class="hp-s">Miễn phí từ 200.000đ</div></div></div>
+    <div class="hp"><div class="hp-i"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="hp-t">Hỗ trợ 24/7</div><div class="hp-s">0869.120.122</div></div></div>
+    <div class="hp"><div class="hp-i"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div><div><div class="hp-t">Ocean Park 1</div><div class="hp-s">Hà Nội</div></div></div>
+  </div>
+  <div class="shop-search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="shop-search-input" placeholder="Tìm bánh, đồ uống..." oninput="searchProducts(this.value)">
+  </div>
+  <button class="cart-btn" onclick="openCart()"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Giỏ hàng<span class="cdot" id="ccnt">0</span></button>
+</div></header>
+
+<nav class="navbar"><div class="i">
+  <button type="button" class="hamburger" id="hamburger" onclick="toggleMobileMenu()" title="Menu"><span></span><span></span><span></span></button>
+  <div class="nav-links" id="nav-links">
+    <a class="na on" href="#" onclick="gHome();closeMobileMenu();return false">Trang chủ</a>
+    <div class="ndrop"><button class="na">Thực đơn ▾</button><div class="dm" id="nav-menu-dropdown"></div></div>
+    <a class="na" href="#" onclick="fCat('Croissant');closeMobileMenu();return false">Croissant</a>
+    <a class="na" href="#" onclick="fCat('Tart');closeMobileMenu();return false">Tart</a>
+    <a class="na" href="#" onclick="fCat('Đồ Uống');closeMobileMenu();return false">Đồ Uống</a>
+    <a class="na" href="#" onclick="scrollToBlog();closeMobileMenu();return false">📖 Blog</a>
+  </div>
+  <button class="n-adm" onclick="gAdmin()"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Quản lý</button>
+</div></nav>
+
+<!-- ═══════ SHOP PAGE ═══════ -->
+<div id="pg-shop">
+<div class="pw">
+  <div class="hgrid">
+    <!-- Sidebar Categories -->
+    <div class="sbar">
+      <div class="sb-h"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Danh mục</div>
+      <div id="sidebar-cats"></div>
+    </div>
+
+    <!-- Slider -->
+    <div class="slider">
+      <div class="str" id="str">
+        <div class="sl on"><img src="/images/slider/slide1.jpg" alt="Hello Cake Đối Tác"><div class="sc sc-partner"><div class="stag stag-partner">Tìm Đối Tác</div><h2>Trở thành Đại Lý Hello Cake</h2><p>Chiết khấu hấp dẫn · Hỗ trợ marketing · Đào tạo miễn phí</p><button class="sbtn" onclick="scrollToPartner()">Liên hệ ngay <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div></div>
+        <div class="sl"><img src="/images/slider/slide2.jpg" alt="Sỉ Croissant"><div class="sc sc-partner"><div class="stag stag-partner">Giá Sỉ Tốt Nhất</div><h2>Cung cấp sỉ Croissant & Tart</h2><p>Từ 50 chiếc/đơn · Giá sỉ giảm đến 30% · Giao hàng tận nơi</p><button class="sbtn" onclick="scrollToPartner()">Nhận báo giá <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div></div>
+        <div class="sl"><img src="/images/slider/slide4.jpg" alt="Quán Cafe"><div class="sc sc-partner"><div class="stag stag-partner">Dành cho Quán Café</div><h2>Bánh tươi mỗi sáng cho quán của bạn</h2><p>Giao 6h sáng · Menu đa dạng · Không cần lò nướng</p><button class="sbtn" onclick="scrollToPartner()">Hợp tác ngay <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div></div>
+        <div class="sl"><img src="/images/slider/slide3.jpg" alt="Best Seller"><div class="sc"><div class="stag">Best Seller</div><h2>Croissant Handmade</h2><p>10 vị độc đáo · Nướng tươi mỗi ngày · Ship từ 2 chiếc</p><button class="sbtn" onclick="fCat('Croissant')">Đặt hàng <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div></div>
+        <div class="sl"><img src="/images/slider/slide5.jpg" alt="Tart Trái Cây"><div class="sc"><div class="stag">Tươi mỗi sáng</div><h2>Tart Trái Cây & Bánh Mì</h2><p>Nguyên liệu nhập khẩu · Bơ Pháp · Matcha Nhật</p><button class="sbtn" onclick="fCat('Tart')">Khám phá <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div></div>
+      </div>
+      <div class="sarr"><button onclick="sMv(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><button onclick="sMv(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+      <div class="sdots" id="sdots"></div>
+    </div>
+  </div>
+
+  <!-- Banners -->
+  <div class="bnrs">
+    <div class="bnr b1" onclick="scrollToPartner()"><div class="bov"><div class="bt"><div class="bl">Hợp tác kinh doanh</div><div class="bh">Đối Tác Bán Hàng</div><div class="bs2">Đại lý · Sỉ · Quán Café</div></div><div class="bi">🤝</div></div></div>
+    <div class="bnr b2" onclick="scrollToBlog()"><div class="bov"><div class="bt"><div class="bl">Đào tạo chuyên nghiệp</div><div class="bh">Học Làm Bánh</div><div class="bs2">1 kèm 1 · Online · Tại xưởng</div></div><div class="bi">👨‍🍳</div></div></div>
+    <div class="bnr b3" onclick="scrollToPartner()"><div class="bov"><div class="bt"><div class="bl">Cung cấp trọn gói</div><div class="bh">Thiết Bị Làm Bánh</div><div class="bs2">Lò nướng · Dụng cụ · Nguyên liệu</div></div><div class="bi">🔧</div></div></div>
+  </div>
+
+  <!-- Section 1: Chương trình Đại lý -->
+  <div class="b2b-banner" onclick="scrollToPartner()">
+    <div class="b2b-banner-bg"></div>
+    <div class="b2b-banner-content">
+      <div class="b2b-badge">Tuyển Đối Tác 2026</div>
+      <h2>Trở thành Đại Lý Hello Cake</h2>
+      <p>Mở rộng kinh doanh cùng thương hiệu bánh handmade được yêu thích nhất Ocean Park</p>
+      <div class="b2b-highlights">
+        <span>🎯 Chiết khấu 25%</span>
+        <span>📢 Hỗ trợ marketing</span>
+        <span>🎓 Đào tạo miễn phí</span>
+        <span>📦 Giao hàng tận nơi</span>
+      </div>
+      <button type="button" class="b2b-cta" onclick="scrollToPartner()">Liên hệ hợp tác ngay</button>
+    </div>
+  </div>
+
+  <!-- Section 2: Dành cho Quán Café -->
+  <div class="cafe-section">
+    <div class="cafe-content">
+      <div class="cafe-text">
+        <div class="b2b-badge cafe-badge">Dành cho Quán Café</div>
+        <h2>Bánh tươi mỗi sáng cho quán của bạn</h2>
+        <p>Không cần lò nướng, không cần thợ bánh — chỉ cần bày lên tủ và bán. Hello Cake lo phần còn lại.</p>
+        <ul class="cafe-benefits">
+          <li><span class="cafe-icon">🕐</span><div><strong>Giao trước 6h sáng</strong><br>Bánh nướng tươi từ 4h, giao tận quán trước giờ mở cửa</div></li>
+          <li><span class="cafe-icon">📋</span><div><strong>Menu 17 loại bánh</strong><br>Croissant, Tart, Bánh Mì — đa dạng lựa chọn cho khách</div></li>
+          <li><span class="cafe-icon">🎨</span><div><strong>Standee & Menu miễn phí</strong><br>Thiết kế bảng menu, tent card theo thương hiệu quán</div></li>
+          <li><span class="cafe-icon">💰</span><div><strong>Margin hấp dẫn 40-50%</strong><br>Giá nhập sỉ thấp, bán lẻ theo giá đề xuất</div></li>
+        </ul>
+        <div class="cafe-cta">
+          <a href="tel:0869120122" class="partner-btn">📞 0869.120.122</a>
+          <a href="https://zalo.me/0869120122" class="partner-btn partner-btn-zalo">💬 Zalo tư vấn</a>
+        </div>
+      </div>
+      <div class="cafe-showcase">
+        <div class="cafe-phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <iframe title="Hello Cake Video" src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F4903367233220945&show_text=false&width=280" class="phone-video" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+          </div>
+          <div class="phone-home-bar"></div>
+        </div>
+        <div class="seeding-cards">
+          <div class="seed-scroll" id="seed-scroll"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Best Seller (thu gọn) -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-t">⭐ Sản phẩm được quán café đặt nhiều nhất</div></div>
+    <div class="pgrid" id="bsg"></div>
+  </div>
+
+  <!-- All Products -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-t" id="allt">🛍 Toàn bộ Menu</div><div class="stabs" id="allt2"></div></div>
+    <div class="pgrid" id="allg"></div>
+  </div>
+</div>
+
+<!-- Bảng giá Sỉ (sau menu, trước blog) -->
+<div class="pw">
+  <div class="sec">
+    <div class="sec-h"><div class="sec-t">💰 Bảng giá Sỉ</div></div>
+    <div class="wholesale-grid">
+      <div class="ws-card">
+        <div class="ws-badge">Phổ biến</div>
+        <div class="ws-tier">Gói 50+ chiếc</div>
+        <div class="ws-discount">Giảm 30%</div>
+        <ul class="ws-list">
+          <li>Croissant <del>69.000đ</del> <strong>48.000đ</strong></li>
+          <li>Tart <del>129.000đ</del> <strong>90.000đ</strong></li>
+          <li>Bánh Mì <del>64.000đ</del> <strong>45.000đ</strong></li>
+        </ul>
+        <a href="tel:0869120122" class="ws-btn">📞 Nhận báo giá</a>
+      </div>
+      <div class="ws-card ws-featured">
+        <div class="ws-badge ws-badge-hot">Tốt nhất</div>
+        <div class="ws-tier">Gói 100+ chiếc</div>
+        <div class="ws-discount">Giảm 35%</div>
+        <ul class="ws-list">
+          <li>Croissant <del>69.000đ</del> <strong>45.000đ</strong></li>
+          <li>Tart <del>129.000đ</del> <strong>84.000đ</strong></li>
+          <li>Bánh Mì <del>64.000đ</del> <strong>42.000đ</strong></li>
+        </ul>
+        <a href="https://zalo.me/0869120122" class="ws-btn ws-btn-primary">💬 Zalo báo giá</a>
+      </div>
+      <div class="ws-card">
+        <div class="ws-badge">Đại lý</div>
+        <div class="ws-tier">Gói 200+ chiếc</div>
+        <div class="ws-discount">Giá riêng</div>
+        <ul class="ws-list">
+          <li>Giá đặc biệt theo hợp đồng</li>
+          <li>Hỗ trợ standee, menu</li>
+          <li>Đào tạo nhân viên</li>
+        </ul>
+        <a href="tel:0869120122" class="ws-btn">🤝 Liên hệ đại lý</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Blog Section -->
+<div class="blog-sec" id="blog-sec">
+<div class="pw">
+  <div class="sec-h" style="border-color:var(--bd)">
+    <div class="sec-t">📖 Bí quyết làm bánh</div>
+    <div class="stabs">
+      <button class="stab on" onclick="filterBlog('Tất cả',this)">Tất cả</button>
+      <button class="stab" onclick="filterBlog('Kỹ thuật',this)">Kỹ thuật</button>
+      <button class="stab" onclick="filterBlog('Nguyên liệu',this)">Nguyên liệu</button>
+      <button class="stab" onclick="filterBlog('Công thức',this)">Công thức</button>
+      <button class="stab" onclick="filterBlog('Mẹo hay',this)">Mẹo hay</button>
+    </div>
+  </div>
+  <div class="blog-featured" id="blog-featured"></div>
+  <div class="blog-grid" id="blog-grid"></div>
+  <div style="text-align:center;margin-top:24px">
+    <button class="sbtn" style="margin:0 auto;background:#329E60;color:#fff;padding:10px 28px" onclick="loadMoreBlog()">
+      Xem thêm bài viết <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- Blog Modal -->
+<div class="blog-modal" id="blog-modal">
+  <div class="blog-mbox">
+    <button class="blog-mclose" onclick="closeBlog()">✕</button>
+    <div class="blog-mcontent">
+      <div class="blog-mtag" id="bm-tag"></div>
+      <h2 class="blog-mtitle" id="bm-title"></h2>
+      <div class="blog-mmeta" id="bm-meta"></div>
+      <div class="blog-mbody" id="bm-body"></div>
+      <div class="blog-tags-row" id="bm-tags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTNER SECTION -->
+<div class="partner-sec" id="partner-sec">
+<div class="pw">
+  <div class="sec-h"><div class="sec-t">🤝 Hợp tác cùng Hello Cake</div></div>
+  <div class="partner-grid">
+    <div class="partner-card">
+      <div class="partner-icon">🏪</div>
+      <h3>Đại Lý</h3>
+      <p>Mở đại lý Hello Cake tại khu vực của bạn. Chiết khấu lên đến <strong>25%</strong>, hỗ trợ marketing & đào tạo miễn phí.</p>
+      <ul><li>Vốn đầu tư từ 15 triệu</li><li>Hỗ trợ thiết kế gian hàng</li><li>Cung cấp nguyên liệu độc quyền</li></ul>
+    </div>
+    <div class="partner-card">
+      <div class="partner-icon">📦</div>
+      <h3>Mua Sỉ</h3>
+      <p>Đặt sỉ từ <strong>50 chiếc</strong> với giá ưu đãi giảm đến <strong>30%</strong>. Giao hàng tận nơi trong ngày.</p>
+      <ul><li>Croissant sỉ từ 48.000đ/chiếc</li><li>Tart sỉ từ 90.000đ/chiếc</li><li>Đóng gói theo yêu cầu</li></ul>
+    </div>
+    <div class="partner-card">
+      <div class="partner-icon">☕</div>
+      <h3>Quán Café</h3>
+      <p>Cung cấp bánh tươi mỗi sáng cho quán café. <strong>Không cần lò nướng</strong>, chỉ cần bày lên tủ.</p>
+      <ul><li>Giao trước 6h sáng</li><li>Menu đa dạng 17 loại</li><li>Hỗ trợ standee, menu</li></ul>
+    </div>
+  </div>
+  <div class="partner-cta">
+    <p>Liên hệ ngay để nhận báo giá sỉ & chính sách đại lý</p>
+    <a href="tel:0869120122" class="partner-btn">📞 0869.120.122</a>
+    <a href="https://zalo.me/0869120122" class="partner-btn partner-btn-zalo">💬 Zalo tư vấn</a>
+  </div>
+</div>
+</div>
+
+<footer class="footer"><div class="i">
+  <div class="footer-b"><div class="fn">Hello Cake 🎂</div><p>📍 Toà S2.15 Ocean Park 1, Hà Nội<br>📞 0869.120.122<br>🕐 09:00–22:30 mỗi ngày<br>🚀 Ship từ 2 chiếc · Giao toàn quận</p></div>
+  <div><h4>Thực đơn</h4><ul><li onclick="fCat('Croissant')">🥐 Croissant</li><li onclick="fCat('Tart')">🥧 Tart trái cây</li><li onclick="fCat('Bánh Mì')">🍞 Bánh Mì</li><li onclick="fCat('Đồ Uống')">🍵 Đồ Uống</li></ul></div>
+  <div><h4>Hỗ trợ</h4><ul><li>Chính sách giao hàng</li><li>Đổi trả sản phẩm</li><li>Hướng dẫn đặt hàng</li><li>Liên hệ chúng tôi</li></ul></div>
+  <div><h4>Kết nối</h4><ul><li>Facebook</li><li>Instagram</li><li>TikTok</li><li>Zalo OA</li></ul></div>
+</div>
+<div class="fbtm"><span>© 2026 Hello Cake — Bánh tươi handmade mỗi ngày</span><div class="fsoc"><a href="#">f</a><a href="#">ig</a><a href="#">tt</a><a href="#">z</a></div></div>
+</footer>
+</div>
+
+<!-- ═══════ ADMIN LOGIN ═══════ -->
+<div id="pg-admin-login" class="admin-login-page">
+  <div class="admin-login-box">
+    <div class="admin-login-logo">🎂</div>
+    <h2>Hello Cake Admin</h2>
+    <p>Đăng nhập để quản lý hệ thống</p>
+    <div class="fg"><label>Mật khẩu</label><input type="password" id="admin-pw" placeholder="Nhập mật khẩu admin" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+    <button type="button" class="cfbtn" onclick="adminLogin()">🔐 Đăng nhập</button>
+    <div id="admin-err" class="voucher-msg err"></div>
+  </div>
+</div>
+
+<!-- ═══════ ADMIN PAGE ═══════ -->
+<div id="pg-admin" style="display:none">
+<div class="adw">
+  <div class="adt">
+    <h2>🎂 Quản lý Hello Cake</h2>
+    <button class="bsb" onclick="gHome()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Về trang chủ</button>
+    <button class="bsb bsb-logout" onclick="adminLogout()">🔓 Đăng xuất</button>
+  </div>
+  <div class="adnav">
+    <button class="atn on" onclick="aTab('dash')">📊 Tổng quan</button>
+    <button class="atn" onclick="aTab('ord')">📦 Đơn hàng</button>
+    <button class="atn" onclick="aTab('pro')">🛍 Sản phẩm</button>
+    <button class="atn" onclick="aTab('cus')">👤 Khách hàng</button>
+    <button class="atn" onclick="aTab('crm')">💝 CRM</button>
+    <button class="atn" onclick="aTab('voucher')">🎫 Voucher</button>
+    <button class="atn" onclick="aTab('api')">🔌 Kết nối</button>
+    <button class="atn" onclick="aTab('db')">🗄 Database</button>
+    <button class="atn" onclick="aTab('seo')">🔍 SEO</button>
+  </div>
+  <div id="adc"></div>
+</div>
+</div>
+
+<!-- ═══════ CART DRAWER ═══════ -->
+<div class="cov" id="cov"><div class="cbg" onclick="closeCart()"></div>
+  <div class="cdr">
+    <div class="chd"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><h3>Giỏ hàng</h3><span class="hcn" id="hcn">0</span><button class="cx" onclick="closeCart()">✕</button></div>
+    <div class="cbd" id="cbd"><div class="cemp"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Giỏ hàng trống</p></div></div>
+    <div class="cft" id="cft" style="display:none"><div class="csub"><span>Tạm tính (<span id="icn">0</span> món)</span><span id="csb"></span></div><div class="ctot"><span>Tổng cộng</span><span id="ctv"></span></div><button class="cobtn" onclick="openCO()"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Tiến hành đặt hàng</button></div>
+  </div>
+</div>
+
+<!-- ═══════ CHECKOUT MODAL ═══════ -->
+<div class="mow" id="mow">
+  <div class="mox">
+    <div class="mhd"><h3>Xác nhận đặt hàng</h3><button class="mx" onclick="closeCO()">✕</button></div>
+    <div class="mb">
+      <div class="op" id="opv"></div>
+      <div class="fg"><label>Họ tên *</label><input id="fn" placeholder="Nguyễn Văn A"></div>
+      <div class="fg"><label>Số điện thoại *</label><input id="fp" placeholder="0901 234 567" type="tel"></div>
+      <div class="fg"><label>Địa chỉ giao hàng</label><input id="fa" placeholder="Để trống nếu đến lấy trực tiếp"></div>
+      <div class="fg"><label>Ghi chú</label><textarea id="fo" placeholder="Ít đường, không đá..."></textarea></div>
+      <div class="fg"><label>Mã giảm giá</label><div class="voucher-row"><input id="fv" placeholder="Nhập mã: HELLOCAKE"><button type="button" class="voucher-btn" onclick="applyVoucher()">Áp dụng</button></div><div id="voucher-msg" class="voucher-msg"></div></div>
+      <div class="fg"><label>Thanh toán</label><div class="prow"><div class="po on" data-v="Tiền mặt" onclick="selP(this)">💵 Tiền mặt</div><div class="po" data-v="Chuyển khoản" onclick="selP(this)">🏦 QR Chuyển khoản</div><div class="po" data-v="COD" onclick="selP(this)">🚚 COD ship</div></div></div>
+      <div class="qr-bank" id="qr-bank">
+        <div class="qr-box">
+          <p class="qr-title">Quét mã QR để chuyển khoản</p>
+          <div class="qr-frame">
+            <img id="qr-img" src="" alt="QR Code" class="qr-img">
+            <div id="qr-placeholder" class="qr-placeholder">QR sẽ hiện khi đặt hàng</div>
+          </div>
+          <div class="qr-info">
+            <p><strong>HELLO CAKE</strong></p>
+            <p>MB Bank · 0869120122</p>
+            <p class="qr-note">Nội dung: <strong id="qr-content">HC-xxx</strong></p>
+          </div>
+        </div>
+      </div>
+      <button class="cfbtn" onclick="placeOrder()"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Xác nhận đặt hàng</button>
+      <button class="bkbtn" onclick="closeCO()">← Quay lại giỏ hàng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SUCCESS MODAL ═══════ -->
+<div class="sow" id="sow">
+  <div class="sb2">
+    <div class="sic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+    <h3>Đặt hàng thành công! 🎉</h3>
+    <p>Cảm ơn bạn đã đặt hàng tại Hello Cake<br>Chúng tôi sẽ liên hệ xác nhận trong 5 phút</p>
+    <div class="sid" id="soid"></div>
+    <button class="ctbtn" onclick="closeSuccess()">Tiếp tục mua hàng</button>
+  </div>
+</div>
+
+<!-- Send Offer Modal -->
+<div class="mow" id="send-modal">
+  <div class="mox" style="max-width:580px">
+    <div class="mhd"><h3 id="send-modal-title">Gửi ưu đãi</h3><button type="button" class="mx" onclick="closeSendModal()">✕</button></div>
+    <div class="mb" id="send-modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast-el"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

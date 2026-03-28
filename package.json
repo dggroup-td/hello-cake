@@ -1,0 +1,26 @@
+{
+  "name": "hello-cake",
+  "version": "1.0.0",
+  "description": "Hello Cake — Bánh Tươi Handmade - Hệ thống quản lý tiệm bánh",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js --open"
+  },
+  "keywords": [
+    "bakery",
+    "cake",
+    "handmade",
+    "ecommerce",
+    "order-management"
+  ],
+  "author": "Hello Cake",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1",
+    "open": "^10.1.0",
+    "sharp": "^0.34.5"
+  }
+}
