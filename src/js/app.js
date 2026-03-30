@@ -280,6 +280,12 @@ function toggleCafeVideo() {
   else { vid.pause(); vid.muted = true; if (overlay) overlay.classList.remove('hidden'); }
 }
 
+// ══ SCROLL TO TOP ══
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scroll-top');
+  if (btn) btn.classList.toggle('show', window.scrollY > 400);
+});
+
 function scrollToPartner() {
   const el = document.getElementById('partner-sec');
   if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -345,8 +351,8 @@ function addC(id, btnEl) {
   const dot = document.getElementById('ccnt');
   if (dot) { dot.classList.remove('bump'); void dot.offsetWidth; dot.classList.add('bump'); setTimeout(() => dot.classList.remove('bump'), 200); }
 
-  // Auto-open cart drawer (like original)
-  openCart();
+  // Chỉ update mini cart — không mở drawer to
+  updateStickyCart();
 }
 
 function uBadge() {
@@ -362,6 +368,7 @@ function chQ(id, d) {
   if (cart[i].qty <= 0) cart.splice(i, 1);
   uBadge();
   rCart();
+  updateStickyCart();
 }
 
 function rCart() {
@@ -404,6 +411,34 @@ function rCart() {
     setTextById('csb', fmt(cT()));
     setTextById('ctv', fmt(cT()));
   }
+}
+
+function updateStickyCart() {
+  const el = document.getElementById('sticky-cart');
+  if (!el) return;
+  if (cart.length === 0) { el.classList.remove('show'); return; }
+  el.classList.add('show');
+  el.innerHTML = `
+    <div class="sc-header"><span>🛒 Giỏ hàng (${cQ()} món)</span><button onclick="document.getElementById('sticky-cart').classList.remove('show')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px">✕</button></div>
+    <div class="sc-items">
+      ${cart.map(c => `<div class="sc-item">
+        <div class="sc-item-info">
+          <span class="sc-item-name">${esc(c.name)}</span>
+          <span class="sc-item-price">${fmt(c.price)}</span>
+        </div>
+        <div class="sc-item-qty">
+          <button onclick="chQ(${c.id},-1)" class="sc-qty-btn">−</button>
+          <span>${c.qty}</span>
+          <button onclick="chQ(${c.id},1)" class="sc-qty-btn">+</button>
+          <button onclick="chQ(${c.id},-999)" class="sc-del-btn">✕</button>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="sc-footer">
+      <div class="sc-total"><span>Tổng cộng:</span><strong>${fmt(cT())}</strong></div>
+      <button class="sc-checkout-btn" onclick="closeCart();openCO()">Đặt hàng ngay</button>
+    </div>
+  `;
 }
 
 function openCart() { document.getElementById('cov').classList.add('open'); rCart(); }
@@ -493,7 +528,9 @@ async function placeOrder() {
   const address = document.getElementById('fa').value.trim();
   const note = document.getElementById('fo').value.trim();
 
-  if (!name || !phone) { toast('Vui lòng nhập họ tên và SĐT!', 'error'); return; }
+  if (!name) { toast('Vui lòng nhập họ tên!', 'error'); document.getElementById('fn')?.focus(); return; }
+  if (!phone) { toast('Vui lòng nhập số điện thoại!', 'error'); document.getElementById('fp')?.focus(); return; }
+  if (!/^0\d{9}$/.test(phone)) { toast('Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)', 'error'); document.getElementById('fp')?.focus(); return; }
   if (!cart.length) { toast('Giỏ hàng trống!', 'error'); return; }
 
   try {
@@ -530,7 +567,7 @@ function closeSuccess() {
 // ══ ADMIN ══
 function aTab(t) {
   cAdm = t;
-  const tabs = ['dash', 'ord', 'pro', 'cus', 'crm', 'voucher', 'api', 'db', 'seo'];
+  const tabs = ['dash', 'ord', 'pro', 'cus', 'journey', 'crm', 'voucher', 'accounting', 'api', 'db', 'seo'];
   document.querySelectorAll('.atn').forEach((b, i) => b.classList.toggle('on', tabs[i] === t));
   rAdm();
 }
@@ -542,8 +579,10 @@ async function rAdm() {
   else if (cAdm === 'ord') c.innerHTML = await rOrd();
   else if (cAdm === 'pro') c.innerHTML = await rPro();
   else if (cAdm === 'cus') c.innerHTML = await rCus();
+  else if (cAdm === 'journey') c.innerHTML = await rJourney();
   else if (cAdm === 'crm') c.innerHTML = await rCRM();
   else if (cAdm === 'voucher') c.innerHTML = await rVoucher();
+  else if (cAdm === 'accounting') c.innerHTML = await rAccounting();
   else if (cAdm === 'api') c.innerHTML = rAPI();
   else if (cAdm === 'db') c.innerHTML = await rDB();
   else if (cAdm === 'seo') c.innerHTML = rSEO();
@@ -587,6 +626,18 @@ async function rDash() {
     <div class="sc2" style="border-top-color:#e11d48"><div class="sl2">Khách quay lại</div><div class="sv">${cs.returning_rate}%</div></div>
   </div>`;
 
+  // ── Today Realtime ──
+  const today = revenue.today || {};
+  h += `<div class="acd today-realtime" style="margin-bottom:14px;border-left:4px solid #2D6A4F">
+    <div class="ach"><span>⚡ Hôm nay (cập nhật tức thì)</span><span style="font-size:10px;color:var(--tx3)">${new Date().toLocaleDateString('vi-VN', {weekday:'long', day:'2-digit', month:'2-digit', year:'numeric'})}</span></div>
+    <div class="sgrid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="seg-card" style="background:#E8F5E9"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">Doanh thu hôm nay</div><div class="seg-num" style="color:#2D6A4F">${fmt(today.revenue || 0)}</div><div style="font-size:10px;color:var(--tx3)">${today.orders || 0} đơn</div></div>
+      <div class="seg-card" style="background:#FDECEA"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">Chi phí hôm nay</div><div class="seg-num" style="color:#dc2626">${fmt(today.expense || 0)}</div></div>
+      <div class="seg-card" style="background:${(today.profit || 0) >= 0 ? '#E8F5E9' : '#FDECEA'}"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">Lợi nhuận hôm nay</div><div class="seg-num" style="color:${(today.profit || 0) >= 0 ? '#2D6A4F' : '#dc2626'}">${fmt(today.profit || 0)}</div></div>
+      <div class="seg-card" style="background:#EBF5FB"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">So với hôm qua</div><div class="seg-num" style="color:${comp.today >= comp.yesterday ? '#2D6A4F' : '#dc2626'}">${todayD}</div><div style="font-size:10px;color:var(--tx3)">HQ: ${fmt(comp.yesterday)}</div></div>
+    </div>
+  </div>`;
+
   // ── Revenue Chart ──
   h += `<div class="acd">
     <div class="ach"><span>📈 Biểu đồ doanh thu</span>
@@ -596,7 +647,7 @@ async function rDash() {
         <button class="cpb" onclick="switchRevenuePeriod('12months',this)">12 tháng</button>
       </div>
     </div>
-    <canvas id="revenueChart" height="240"></canvas>
+    <canvas id="revenueChart" height="140"></canvas>
   </div>`;
 
   // ── Comparison Cards ──
@@ -722,26 +773,38 @@ function initRevenueChart(data) {
   const ctx = document.getElementById('revenueChart');
   if (!ctx || typeof Chart === 'undefined') return;
   if (revenueChartInstance) revenueChartInstance.destroy();
+  const labels = data.map(d => {
+    if (d.day) return new Date(d.day).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit' });
+    if (d.month) { const [,m] = d.month.split('-'); return 'T' + parseInt(m); }
+    return '';
+  });
   revenueChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: data.map(d => {
-        if (d.day) return new Date(d.day).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit' });
-        if (d.month) { const [,m] = d.month.split('-'); return 'T' + parseInt(m); }
-        return '';
-      }),
+      labels,
       datasets: [{
         label: 'Doanh thu',
         data: data.map(d => d.revenue),
-        backgroundColor: 'rgba(50,158,96,0.7)',
+        backgroundColor: 'rgba(45,106,79,0.75)',
         borderColor: '#2D6A4F',
         borderWidth: 1,
-        borderRadius: 4
+        borderRadius: 6,
+        barThickness: 22,
+        maxBarThickness: 26
+      },{
+        label: 'Chi phí',
+        data: data.map(d => d.expense || 0),
+        backgroundColor: 'rgba(220,38,38,0.65)',
+        borderColor: '#dc2626',
+        borderWidth: 1,
+        borderRadius: 6,
+        barThickness: 22,
+        maxBarThickness: 26
       }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.raw) } } },
+      plugins: { legend: { display: true, position: 'top', labels: { font: { size: 11 }, padding: 12, usePointStyle: true, pointStyle: 'rectRounded' } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmt(c.raw)}` } } },
       scales: {
         y: { ticks: { callback: v => (v/1000)+'k' }, grid: { color:'#E8F7EE' } },
         x: { grid: { display: false } }
@@ -1340,6 +1403,138 @@ function exportJSON() {
 }
 
 // ══ SEO PANEL ══
+// ══ ACCOUNTING — Kế toán nội bộ ══
+let accMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+let accChartInstance = null;
+
+async function rAccounting() {
+  const [entries, summary] = await Promise.all([
+    api(`/accounting?month=${accMonth}`),
+    api(`/accounting/summary?month=${accMonth}`)
+  ]);
+
+  const catIcons = { 'Nguyên liệu':'🧈', 'Nhân viên':'👥', 'Mặt bằng':'🏠', 'Điện nước':'💡', 'Marketing':'📢', 'Bao bì':'📦', 'Thiết bị':'🔧', 'Vận chuyển':'🚚', 'Khác':'📌', 'Thu khác':'💰' };
+
+  let h = '';
+
+  // ── Tổng quan tài chính ──
+  h += `<div class="sgrid" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
+    <div class="sc2" style="border-top-color:#2D6A4F"><div class="sl2">Doanh thu bán hàng</div><div class="sv" style="color:#2D6A4F">${fmt(summary.revenue)}</div></div>
+    <div class="sc2" style="border-top-color:#059669"><div class="sl2">Thu khác</div><div class="sv" style="color:#059669">${fmt(summary.otherIncome)}</div></div>
+    <div class="sc2" style="border-top-color:#1877f2"><div class="sl2">Tổng thu</div><div class="sv" style="color:#1877f2">${fmt(summary.totalIncome)}</div></div>
+    <div class="sc2" style="border-top-color:#dc2626"><div class="sl2">Tổng chi</div><div class="sv" style="color:#dc2626">${fmt(summary.totalExpense)}</div></div>
+    <div class="sc2" style="border-top-color:${summary.profit >= 0 ? '#2D6A4F' : '#dc2626'}"><div class="sl2">Lợi nhuận (${summary.profitMargin}%)</div><div class="sv" style="color:${summary.profit >= 0 ? '#2D6A4F' : '#dc2626'}">${fmt(summary.profit)}</div></div>
+  </div>`;
+
+  // ── Form thêm giao dịch (luôn hiện, gần biểu đồ) ──
+  h += `<div class="acd" style="margin-bottom:14px">
+    <div class="ach"><span>➕ Thêm giao dịch nhanh</span></div>
+    <div class="fpr">
+      <input id="acc-date" type="date" value="${new Date().toISOString().slice(0,10)}">
+      <select id="acc-type"><option value="expense">📤 Chi phí</option><option value="income">📥 Thu nhập</option></select>
+      <select id="acc-cat">
+        <option>Nguyên liệu</option><option>Nhân viên</option><option>Mặt bằng</option><option>Điện nước</option>
+        <option>Marketing</option><option>Bao bì</option><option>Thiết bị</option><option>Vận chuyển</option>
+        <option>Thu khác</option><option>Khác</option>
+      </select>
+    </div>
+    <div class="fpr" style="margin-top:6px">
+      <input id="acc-desc" placeholder="Mô tả (VD: Mua bơ Président 10kg)" style="flex:2">
+      <input id="acc-amount" type="number" placeholder="Số tiền (đ)">
+      <select id="acc-pay"><option>Tiền mặt</option><option>Chuyển khoản</option></select>
+      <input id="acc-note" placeholder="Ghi chú">
+      <button class="svbtn" onclick="saveAcc()">💾 Lưu</button>
+    </div>
+  </div>`;
+
+  // ── Chọn tháng ──
+  h += `<div class="acd">
+    <div class="ach"><span>📒 Sổ thu chi — Tháng ${accMonth.split('-')[1]}/${accMonth.split('-')[0]}</span>
+      <input type="month" value="${accMonth}" onchange="accMonth=this.value;rAdm()" class="ord-date" style="padding:6px 10px">
+    </div>`;
+
+  // ── Chi phí theo danh mục (pie chart + bảng) ──
+  h += `<div class="dash-2col" style="margin-bottom:14px">
+    <div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">📊 Chi phí theo danh mục</div>
+      <canvas id="accCatChart" height="200"></canvas>
+    </div>
+    <div>
+      ${summary.expensesByCategory.map(e => {
+        const pct = summary.totalExpense > 0 ? Math.round(e.total / summary.totalExpense * 100) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--cr2)">
+          <span style="font-size:16px">${catIcons[e.category] || '📌'}</span>
+          <div style="flex:1"><div style="font-size:12px;font-weight:600">${e.category}</div></div>
+          <div style="text-align:right"><strong style="color:#dc2626">${fmt(e.total)}</strong><div style="font-size:10px;color:var(--tx3)">${pct}%</div></div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  // ── Bảng giao dịch ──
+  h += `<div style="overflow-x:auto"><table>
+    <tr><th>#</th><th>Ngày</th><th>Loại</th><th>Danh mục</th><th>Mô tả</th><th>Số tiền</th><th>Thanh toán</th><th>Ghi chú</th><th></th></tr>
+    ${entries.map((e, i) => `<tr>
+      <td style="color:var(--tx3);font-size:11px">${i + 1}</td>
+      <td style="font-size:11px;white-space:nowrap">${e.date}</td>
+      <td><span class="bdg ${e.type === 'income' ? 'done' : 'can'}">${e.type === 'income' ? '📥 Thu' : '📤 Chi'}</span></td>
+      <td><span style="font-size:12px">${catIcons[e.category] || '📌'} ${e.category}</span></td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.description)}</td>
+      <td><strong style="color:${e.type === 'income' ? '#2D6A4F' : '#dc2626'}">${e.type === 'income' ? '+' : '-'}${fmt(e.amount)}</strong></td>
+      <td style="font-size:11px">${e.payment_method}</td>
+      <td style="font-size:10px;color:var(--tx3);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.note) || '—'}</td>
+      <td><button class="ab" onclick="deleteAcc(${e.id})">🗑</button></td>
+    </tr>`).join('')}
+  </table></div>
+  <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--cr2);font-size:12px;color:var(--tx3)">
+    <span>${entries.length} giao dịch trong tháng ${accMonth.split('-')[1]}</span>
+    <span>Lợi nhuận: <strong style="color:${summary.profit >= 0 ? '#2D6A4F' : '#dc2626'};font-size:14px">${fmt(summary.profit)}</strong> (${summary.profitMargin}%)</span>
+  </div>
+  </div>`;
+
+  // Init chart
+  setTimeout(() => {
+    const ctx = document.getElementById('accCatChart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    if (accChartInstance) accChartInstance.destroy();
+    const cats = summary.expensesByCategory;
+    const colors = ['#dc2626','#d97706','#059669','#1877f2','#7c3aed','#e11d48','#2D6A4F','#6366f1'];
+    accChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: cats.map(c => c.category),
+        datasets: [{ data: cats.map(c => c.total), backgroundColor: colors.slice(0, cats.length), borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } }, tooltip: { callbacks: { label: c => `${c.label}: ${fmt(c.raw)}` } } } }
+    });
+  }, 80);
+
+  return h;
+}
+
+async function saveAcc() {
+  const date = document.getElementById('acc-date')?.value;
+  const type = document.getElementById('acc-type')?.value;
+  const category = document.getElementById('acc-cat')?.value;
+  const description = document.getElementById('acc-desc')?.value.trim();
+  const amount = parseInt(document.getElementById('acc-amount')?.value) || 0;
+  const payment_method = document.getElementById('acc-pay')?.value;
+  const note = document.getElementById('acc-note')?.value.trim();
+  if (!description) { toast('Nhập mô tả!', 'error'); return; }
+  if (!amount) { toast('Nhập số tiền!', 'error'); return; }
+  const result = await api('/accounting', { method: 'POST', body: { date, type, category, description, amount, payment_method, note } });
+  if (result.error) { toast(result.error, 'error'); return; }
+  toast('Đã thêm giao dịch!', 'success');
+  rAdm();
+}
+
+async function deleteAcc(id) {
+  if (!confirm('Xóa giao dịch này?')) return;
+  await api(`/accounting/${id}`, { method: 'DELETE' });
+  toast('Đã xóa', 'success');
+  rAdm();
+}
+
 // ══ API CONNECTIONS ══
 function rAPI() {
   const apis = [
@@ -1632,6 +1827,106 @@ function rSEO() {
       </div>
     </div>
 
+    <div class="dash-2col" style="margin-top:14px">
+      <div class="seo-card">
+        <h4>🔗 Schema.org — Google Rich Snippet</h4>
+        <p style="font-size:11px;color:var(--tx3);margin-bottom:12px">Thêm đoạn code này vào &lt;head&gt; của website để Google hiện đánh giá sao, giá, giờ mở cửa ngay trên kết quả tìm kiếm.</p>
+        <div class="json-box" style="font-size:10px;max-height:220px">&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "Bakery",
+  "name": "Hello Cake",
+  "description": "Croissant & Tart handmade tươi mỗi ngày",
+  "url": "https://hellocake.vn",
+  "telephone": "+84869120122",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Toà S2.15 Ocean Park 1",
+    "addressLocality": "Gia Lâm",
+    "addressRegion": "Hà Nội",
+    "addressCountry": "VN"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "20.9584",
+    "longitude": "105.9368"
+  },
+  "openingHours": "Mo-Su 09:00-22:30",
+  "priceRange": "49.000đ - 129.000đ",
+  "servesCuisine": "Bánh ngọt, Croissant, Tart",
+  "image": "https://hellocake.vn/images/slider/slide1.jpg",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "328"
+  }
+}
+&lt;/script&gt;</div>
+        <button class="db-btn green" style="margin-top:10px" onclick="navigator.clipboard.writeText(document.querySelector('.json-box').textContent.replace(/&lt;/g,'<').replace(/&gt;/g,'>'));toast('Đã copy Schema.org!','success')">📋 Copy code</button>
+      </div>
+      <div class="seo-card">
+        <h4>🌐 Google Search Console</h4>
+        <p style="font-size:11px;color:var(--tx3);margin-bottom:12px">Kết nối website với Google để theo dõi thứ hạng, từ khóa, lỗi crawl.</p>
+        <div class="guide-step"><div class="guide-num">1</div><div class="guide-body"><h5>Đăng ký Search Console</h5><p>Vào <code>search.google.com/search-console</code> → Đăng nhập Gmail → Thêm property → Nhập domain <code>hellocake.vn</code></p></div></div>
+        <div class="guide-step"><div class="guide-num">2</div><div class="guide-body"><h5>Xác minh domain</h5><p>Chọn xác minh bằng <strong>DNS TXT record</strong>. Copy mã Google cho → Vào quản lý DNS domain → Thêm TXT record.</p></div></div>
+        <div class="guide-step"><div class="guide-num">3</div><div class="guide-body"><h5>Gửi Sitemap</h5><p>Sau khi xác minh → Vào Sitemaps → Nhập <code>hellocake.vn/sitemap.xml</code> → Submit. Google sẽ index website trong 24-48h.</p></div></div>
+        <div class="guide-step"><div class="guide-num">4</div><div class="guide-body"><h5>Theo dõi kết quả</h5><p>Sau 7 ngày → Tab Performance → Xem từ khóa nào khách tìm, CTR, vị trí trung bình. Tối ưu bài viết theo data thực.</p></div></div>
+
+        <div style="margin-top:14px">
+          <h5 style="font-size:12px;font-weight:700;margin-bottom:8px">📊 Dự kiến kết quả Google hiển thị:</h5>
+          <div class="seo-preview">
+            <div class="seo-preview-url">hellocake.vn</div>
+            <div class="seo-preview-title">Hello Cake — Croissant & Tart Handmade Hà Nội | Tìm Đại Lý</div>
+            <div style="color:#D4A843;font-size:12px;margin-bottom:2px">⭐⭐⭐⭐⭐ 4.9 (328 đánh giá) · 49K-129K · Mở cửa</div>
+            <div class="seo-preview-desc">Croissant, Tart trái cây handmade tươi mỗi ngày tại Ocean Park, Hà Nội. Cung cấp sỉ cho quán café. Tuyển đại lý miền Bắc...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="seo-card" style="margin-top:14px">
+      <h4>🗺 Sitemap.xml & Robots.txt</h4>
+      <div class="dash-2col" style="margin-bottom:0">
+        <div>
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">sitemap.xml</div>
+          <div class="json-box" style="font-size:10px;max-height:180px">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://hellocake.vn/&lt;/loc&gt;
+    &lt;priority&gt;1.0&lt;/priority&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://hellocake.vn/dai-ly&lt;/loc&gt;
+    &lt;priority&gt;0.9&lt;/priority&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://hellocake.vn/menu&lt;/loc&gt;
+    &lt;priority&gt;0.8&lt;/priority&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://hellocake.vn/blog&lt;/loc&gt;
+    &lt;priority&gt;0.7&lt;/priority&gt;
+  &lt;/url&gt;
+&lt;/urlset&gt;</div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">robots.txt</div>
+          <div class="json-box" style="font-size:10px;max-height:180px">User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+
+Sitemap: https://hellocake.vn/sitemap.xml</div>
+          <div style="margin-top:8px;font-size:11px;color:var(--tx3)">
+            <strong>Giải thích:</strong><br>
+            • <code>Allow: /</code> — Cho Google crawl toàn bộ<br>
+            • <code>Disallow: /api/</code> — Ẩn API endpoint<br>
+            • <code>Disallow: /admin</code> — Ẩn trang admin
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="acd" style="margin-top:14px">
       <div class="ach"><span>✅ SEO Checklist</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px">
@@ -1760,6 +2055,145 @@ async function openBlog(id) {
 function closeBlog() {
   document.getElementById('blog-modal').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// ══ CUSTOMER JOURNEY — Hành trình khách hàng ══
+let journeyChartInstance = null;
+
+async function rJourney() {
+  const data = await api('/dashboard/customer-journey');
+  const { sources, conversion, sourceQuality } = data;
+
+  const sourceIcons = { facebook:'📘', zalo:'💬', tiktok:'🎵', instagram:'📸', website:'🌐', cua_hang:'🏪', sdt:'📱' };
+  const sourceNames = { facebook:'Facebook', zalo:'Zalo', tiktok:'TikTok', instagram:'Instagram', website:'Website', cua_hang:'Cửa hàng', sdt:'Gọi điện' };
+  const sourceColors = ['#1877f2','#0068FF','#000000','#E4405F','#2D6A4F','#d97706','#059669'];
+
+  const totalCustomers = sources.reduce((s, x) => s + x.count, 0) || 1;
+  const totalRevenue = sources.reduce((s, x) => s + x.revenue, 0);
+
+  let h = '';
+
+  // ── Conversion Funnel ──
+  h += `<div class="acd" style="margin-bottom:14px">
+    <div class="ach"><span>🔄 Phễu chuyển đổi khách hàng</span></div>
+    <div class="funnel-grid">
+      <div class="funnel-step funnel-1">
+        <div class="funnel-num">${conversion.total}</div>
+        <div class="funnel-label">Tổng khách</div>
+        <div class="funnel-pct">100%</div>
+      </div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step funnel-2">
+        <div class="funnel-num">${conversion.came_back}</div>
+        <div class="funnel-label">Quay lại (2+ đơn)</div>
+        <div class="funnel-pct">${conversion.total ? Math.round(conversion.came_back / conversion.total * 100) : 0}%</div>
+      </div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step funnel-3">
+        <div class="funnel-num">${conversion.became_vip}</div>
+        <div class="funnel-label">Thành VIP (5+ đơn)</div>
+        <div class="funnel-pct">${conversion.total ? Math.round(conversion.became_vip / conversion.total * 100) : 0}%</div>
+      </div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step funnel-4">
+        <div class="funnel-num">${conversion.stayed_one}</div>
+        <div class="funnel-label">Chưa quay lại</div>
+        <div class="funnel-pct funnel-lost">${conversion.total ? Math.round(conversion.stayed_one / conversion.total * 100) : 0}% mất</div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Nguồn khách hàng: Chart + Table ──
+  h += `<div class="dash-2col">
+    <div class="acd" style="margin-bottom:0">
+      <div class="ach"><span>📊 Nguồn khách hàng</span></div>
+      <canvas id="journeySourceChart" height="200"></canvas>
+    </div>
+    <div class="acd" style="margin-bottom:0">
+      <div class="ach"><span>📋 Chi tiết từng nguồn</span></div>
+      ${sources.map((s, i) => {
+        const pct = Math.round(s.count / totalCustomers * 100);
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--cr2)">
+          <span style="font-size:18px">${sourceIcons[s.source] || '📌'}</span>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:600">${sourceNames[s.source] || s.source}</div>
+            <div style="font-size:10px;color:var(--tx3)">${s.count} khách · ${s.orders} đơn · CLV: ${fmt(s.avg_clv)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:14px;font-weight:700;color:#2D6A4F">${pct}%</div>
+            <div style="font-size:10px;color:var(--tx3)">${fmt(s.revenue)}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  // ── Chất lượng nguồn khách ──
+  h += `<div class="acd">
+    <div class="ach"><span>💎 Chất lượng nguồn khách (CLV & Retention)</span></div>
+    <div style="overflow-x:auto"><table>
+      <tr><th>Nguồn</th><th>CLV trung bình</th><th>TB đơn/khách</th><th>Tỉ lệ quay lại</th><th>Đánh giá</th></tr>
+      ${sourceQuality.map(s => {
+        const rating = s.avg_clv > 70000000 ? '🔥 Xuất sắc' : s.avg_clv > 40000000 ? '✅ Tốt' : s.avg_clv > 20000000 ? '⚠️ Trung bình' : '❌ Thấp';
+        const ratingCls = s.avg_clv > 70000000 ? 'done' : s.avg_clv > 40000000 ? 'done' : s.avg_clv > 20000000 ? 'proc' : 'can';
+        return `<tr>
+          <td><strong>${sourceIcons[s.source] || '📌'} ${sourceNames[s.source] || s.source}</strong></td>
+          <td><strong style="color:#2D6A4F">${fmt(s.avg_clv)}</strong></td>
+          <td>${s.avg_orders}</td>
+          <td>${s.retention_rate}%</td>
+          <td><span class="bdg ${ratingCls}">${rating}</span></td>
+        </tr>`;
+      }).join('')}
+    </table></div>
+  </div>`;
+
+  // ── Gợi ý hành động ──
+  const bestSource = sourceQuality[0];
+  const worstSource = sourceQuality[sourceQuality.length - 1];
+  h += `<div class="acd" style="border-left:4px solid #2D6A4F">
+    <div class="ach"><span>💡 Gợi ý hành động</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="padding:12px;background:#E8F5E9;border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:#2E7D32;margin-bottom:4px">✅ Tăng đầu tư</div>
+        <div style="font-size:11px;color:var(--tx2)">Nguồn <strong>${sourceNames[bestSource?.source] || ''}</strong> có CLV cao nhất (${fmt(bestSource?.avg_clv || 0)}). Nên tăng ngân sách marketing kênh này.</div>
+      </div>
+      <div style="padding:12px;background:#FEF3CD;border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:#A05000;margin-bottom:4px">⚠️ Cần cải thiện</div>
+        <div style="font-size:11px;color:var(--tx2)">Nguồn <strong>${sourceNames[worstSource?.source] || ''}</strong> có CLV thấp nhất. Cần tối ưu nội dung hoặc giảm chi phí kênh này.</div>
+      </div>
+      <div style="padding:12px;background:#EBF5FB;border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:#1A75A5;margin-bottom:4px">📈 Tăng retention</div>
+        <div style="font-size:11px;color:var(--tx2)">${conversion.stayed_one} khách mua 1 lần chưa quay lại. Gửi mã MISSYOU20 qua Zalo/SMS để kéo lại.</div>
+      </div>
+      <div style="padding:12px;background:#F3E8FF;border-radius:8px">
+        <div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:4px">🎯 Mục tiêu tháng</div>
+        <div style="font-size:11px;color:var(--tx2)">Nâng tỉ lệ quay lại từ ${conversion.total ? Math.round(conversion.came_back / conversion.total * 100) : 0}% lên ${Math.min(100, (conversion.total ? Math.round(conversion.came_back / conversion.total * 100) : 0) + 10)}% bằng CRM tự động.</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Init chart
+  setTimeout(() => {
+    const ctx = document.getElementById('journeySourceChart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    if (journeyChartInstance) journeyChartInstance.destroy();
+    journeyChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: sources.map(s => sourceNames[s.source] || s.source),
+        datasets: [{ data: sources.map(s => s.count), backgroundColor: sourceColors.slice(0, sources.length), borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } },
+          tooltip: { callbacks: { label: c => `${c.label}: ${c.raw} khách (${Math.round(c.raw/totalCustomers*100)}%)` } }
+        }
+      }
+    });
+  }, 80);
+
+  return h;
 }
 
 // ══ CRM — Chăm sóc khách hàng ══

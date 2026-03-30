@@ -69,6 +69,7 @@ db.exec(`
     zalo TEXT DEFAULT '',
     facebook TEXT DEFAULT '',
     note TEXT DEFAULT '',
+    source TEXT DEFAULT '',
     customer_type TEXT DEFAULT 'retail',
     total_orders INTEGER DEFAULT 0,
     total_spent INTEGER DEFAULT 0,
@@ -119,6 +120,18 @@ db.exec(`
     voucher_code TEXT,
     type TEXT DEFAULT 'promotion',
     sent_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS accounting (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'expense',
+    category TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    amount INTEGER NOT NULL DEFAULT 0,
+    payment_method TEXT DEFAULT 'Tiền mặt',
+    note TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now'))
   );
 
   CREATE TABLE IF NOT EXISTS activity_logs (
@@ -184,7 +197,7 @@ function seedDemoData() {
 
   // === DEMO DATA: 30 ngày, ~300 đơn, doanh thu ~1 tỷ ===
   const insertO = db.prepare('INSERT INTO orders (order_code, customer_name, customer_phone, customer_address, payment_method, items, subtotal, total, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-  const insertC2 = db.prepare('INSERT INTO customers (name, phone, address, email, birthday, company_anniversary, zalo, facebook, note, customer_type, total_orders, total_spent, last_order_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)');
+  const insertC2 = db.prepare('INSERT INTO customers (name, phone, address, email, birthday, company_anniversary, zalo, facebook, note, source, customer_type, total_orders, total_spent, last_order_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
 
   const demoCustomers = [
     { name: 'Nguyễn Thị Lan', phone: '0901234567', addr: 'Tòa S2.08 Ocean Park' },
@@ -274,43 +287,43 @@ function seedDemoData() {
   ];
 
   const custExtras = {
-    '0901234567': { email:'lan.nguyen@gmail.com', birthday:'1995-06-15', note:'Thích Matcha, hay đặt cho con gái' },
-    '0912345678': { email:'minh.tran@outlook.com', birthday:'1990-11-20', note:'Đặt sỉ cho bạn bè cuối tuần' },
-    '0923456789': { email:'giang.le92@gmail.com', birthday:'1992-04-08', note:'Hay gọi thêm Latte Matcha' },
-    '0934567890': { email:'huy.pham@gmail.com', birthday:'1988-09-25', note:'Khách VIP, mua tặng đối tác' },
-    '0945678901': { email:'mai.hoang@yahoo.com', birthday:'1997-12-01', note:'Fan Ruby + Tiramisu' },
-    '0956789012': { email:'quynhanh.ngo@gmail.com', birthday:'1994-03-18', zalo:'0956789012', note:'Fan Dâu Tây + Vanilla' },
-    '0967890123': { email:'tuan.do@hotmail.com', birthday:'1991-07-30', note:'Hay đặt Tart cho tiệc' },
-    '0978901234': { email:'nhung.vu88@gmail.com', birthday:'1988-02-14', note:'Đặt combo Valentine hàng năm' },
-    '0989012345': { email:'tu.bui@gmail.com', birthday:'1993-08-22', note:'Thích thử vị mới' },
-    '0990123456': { email:'ha.ly@gmail.com', birthday:'1996-10-05', note:'Ở xa, hay đặt ship' },
-    '0381234567': { email:'cafebinhminh@gmail.com', company_anniversary:'2024-01-15', note:'Quán café 30 chỗ, đặt 20 chiếc/ngày', facebook:'cafebinhminh.lb' },
-    '0392345678': { email:'quancafemay@gmail.com', company_anniversary:'2023-06-20', note:'Đối tác sỉ, giao 6h sáng', facebook:'cafemay.gl' },
-    '0353456789': { email:'trasua.sunny@gmail.com', company_anniversary:'2025-03-01', note:'Chuỗi 2 chi nhánh Ocean Park' },
-    '0364567890': { email:'bakery.minhchau@gmail.com', company_anniversary:'2022-09-10', note:'Đại lý, chiết khấu 25%', zalo:'0364567890' },
-    '0375678901': { email:'ngoc.phan@gmail.com', birthday:'1999-05-28', note:'Sinh viên, hay mua combo rẻ' },
-    '0316789012': { email:'nam.truong@gmail.com', birthday:'1987-01-12', note:'Đặt party cuối tháng' },
-    '0327890123': { email:'linh.dinh@gmail.com', birthday:'1995-11-03', note:'Review trên Facebook, tặng voucher' },
-    '0338901234': { email:'hr@abccorp.vn', company_anniversary:'2020-04-01', note:'VP 50 người, đặt tiệc SN hàng tháng', facebook:'abccorp.vn' },
-    '0349012345': { email:'anh.nguyen.d@gmail.com', birthday:'1992-06-18', note:'Mua tặng bạn gái' },
-    '0350123456': { email:'latteart.cafe@gmail.com', company_anniversary:'2024-08-15', note:'Quán specialty coffee, cần croissant cao cấp', zalo:'0350123456' },
-    '0701111111': { email:'hoa.dang@gmail.com', birthday:'1994-04-02', note:'Mới biết qua Facebook' },
-    '0702222222': { email:'binh.luu@gmail.com', birthday:'1990-08-15', note:'Hàng xóm, hay mua sáng' },
-    '0703333333': { email:'duong.trinh@gmail.com', birthday:'1996-03-30', note:'Đặt nhiều Tart' },
-    '0704444444': { email:'cafesach.hd@gmail.com', company_anniversary:'2025-02-01', note:'Quán café sách, 40 chỗ, cần bánh mỗi sáng' },
-    '0711111111': { email:'khoi.hoang99@gmail.com', birthday:'1999-07-20', note:'Khách mới, cần follow up' },
-    '0712222222': { email:'tam.nguyen@gmail.com', birthday:'1991-12-10', note:'Mới thử lần đầu, mua Dâu Tây' },
-    '0713333333': { email:'yen.pham@gmail.com', birthday:'2000-01-15', note:'Sinh viên, mua 1 chiếc Hạnh Nhân' },
-    '0714444444': { email:'cafemoc.bn@gmail.com', company_anniversary:'2023-11-01', note:'Quán café Bắc Ninh, muốn làm đại lý' },
-    '0715555555': { email:'mua@greenfield.vn', company_anniversary:'2020-06-15', note:'Đặt 60 chiếc cho event công ty' },
-    '0721111111': { email:'nga.vuong@gmail.com', birthday:'1993-09-08', note:'Ngủ đông >30 ngày, gửi MISSYOU20' },
-    '0722222222': { email:'dat.ta@gmail.com', birthday:'1989-05-22', note:'Lâu chưa quay lại' },
-    '0723333333': { email:'trachanh36@gmail.com', company_anniversary:'2022-04-10', note:'Đối tác cũ, ngưng đặt từ T2/2026' },
+    '0901234567': { email:'lan.nguyen@gmail.com', birthday:'1995-06-15', note:'Thích Matcha, hay đặt cho con gái', source:'facebook' },
+    '0912345678': { email:'minh.tran@outlook.com', birthday:'1990-11-20', note:'Đặt sỉ cho bạn bè cuối tuần', source:'zalo' },
+    '0923456789': { email:'giang.le92@gmail.com', birthday:'1992-04-08', note:'Hay gọi thêm Latte Matcha', source:'website' },
+    '0934567890': { email:'huy.pham@gmail.com', birthday:'1988-09-25', note:'Khách VIP, mua tặng đối tác', source:'cua_hang' },
+    '0945678901': { email:'mai.hoang@yahoo.com', birthday:'1997-12-01', note:'Fan Ruby + Tiramisu', source:'tiktok' },
+    '0956789012': { email:'quynhanh.ngo@gmail.com', birthday:'1994-03-18', zalo:'0956789012', note:'Fan Dâu Tây + Vanilla', source:'facebook' },
+    '0967890123': { email:'tuan.do@hotmail.com', birthday:'1991-07-30', note:'Hay đặt Tart cho tiệc', source:'zalo' },
+    '0978901234': { email:'nhung.vu88@gmail.com', birthday:'1988-02-14', note:'Đặt combo Valentine hàng năm', source:'instagram' },
+    '0989012345': { email:'tu.bui@gmail.com', birthday:'1993-08-22', note:'Thích thử vị mới', source:'website' },
+    '0990123456': { email:'ha.ly@gmail.com', birthday:'1996-10-05', note:'Ở xa, hay đặt ship', source:'facebook' },
+    '0381234567': { email:'cafebinhminh@gmail.com', company_anniversary:'2024-01-15', note:'Quán café 30 chỗ, đặt 20 chiếc/ngày', facebook:'cafebinhminh.lb', source:'sdt' },
+    '0392345678': { email:'quancafemay@gmail.com', company_anniversary:'2023-06-20', note:'Đối tác sỉ, giao 6h sáng', facebook:'cafemay.gl', source:'cua_hang' },
+    '0353456789': { email:'trasua.sunny@gmail.com', company_anniversary:'2025-03-01', note:'Chuỗi 2 chi nhánh Ocean Park', source:'facebook' },
+    '0364567890': { email:'bakery.minhchau@gmail.com', company_anniversary:'2022-09-10', note:'Đại lý, chiết khấu 25%', zalo:'0364567890', source:'zalo' },
+    '0375678901': { email:'ngoc.phan@gmail.com', birthday:'1999-05-28', note:'Sinh viên, hay mua combo rẻ', source:'tiktok' },
+    '0316789012': { email:'nam.truong@gmail.com', birthday:'1987-01-12', note:'Đặt party cuối tháng', source:'cua_hang' },
+    '0327890123': { email:'linh.dinh@gmail.com', birthday:'1995-11-03', note:'Review trên Facebook, tặng voucher', source:'facebook' },
+    '0338901234': { email:'hr@abccorp.vn', company_anniversary:'2020-04-01', note:'VP 50 người, đặt tiệc SN hàng tháng', facebook:'abccorp.vn', source:'website' },
+    '0349012345': { email:'anh.nguyen.d@gmail.com', birthday:'1992-06-18', note:'Mua tặng bạn gái', source:'instagram' },
+    '0350123456': { email:'latteart.cafe@gmail.com', company_anniversary:'2024-08-15', note:'Quán specialty coffee, cần croissant cao cấp', zalo:'0350123456', source:'zalo' },
+    '0701111111': { email:'hoa.dang@gmail.com', birthday:'1994-04-02', note:'Mới biết qua Facebook', source:'facebook' },
+    '0702222222': { email:'binh.luu@gmail.com', birthday:'1990-08-15', note:'Hàng xóm, hay mua sáng', source:'cua_hang' },
+    '0703333333': { email:'duong.trinh@gmail.com', birthday:'1996-03-30', note:'Đặt nhiều Tart', source:'zalo' },
+    '0704444444': { email:'cafesach.hd@gmail.com', company_anniversary:'2025-02-01', note:'Quán café sách, 40 chỗ, cần bánh mỗi sáng', source:'sdt' },
+    '0711111111': { email:'khoi.hoang99@gmail.com', birthday:'1999-07-20', note:'Khách mới, cần follow up', source:'tiktok' },
+    '0712222222': { email:'tam.nguyen@gmail.com', birthday:'1991-12-10', note:'Mới thử lần đầu, mua Dâu Tây', source:'facebook' },
+    '0713333333': { email:'yen.pham@gmail.com', birthday:'2000-01-15', note:'Sinh viên, mua 1 chiếc Hạnh Nhân', source:'instagram' },
+    '0714444444': { email:'cafemoc.bn@gmail.com', company_anniversary:'2023-11-01', note:'Quán café Bắc Ninh, muốn làm đại lý', source:'facebook' },
+    '0715555555': { email:'mua@greenfield.vn', company_anniversary:'2020-06-15', note:'Đặt 60 chiếc cho event công ty', source:'website' },
+    '0721111111': { email:'nga.vuong@gmail.com', birthday:'1993-09-08', note:'Ngủ đông >30 ngày, gửi MISSYOU20', source:'cua_hang' },
+    '0722222222': { email:'dat.ta@gmail.com', birthday:'1989-05-22', note:'Lâu chưa quay lại', source:'sdt' },
+    '0723333333': { email:'trachanh36@gmail.com', company_anniversary:'2022-04-10', note:'Đối tác cũ, ngưng đặt từ T2/2026', source:'cua_hang' },
   };
 
   for (const c of custFull) {
     const ext = custExtras[c.phone] || {};
-    insertC2.run(c.name, c.phone, c.addr, ext.email||'', ext.birthday||'', ext.company_anniversary||'', ext.zalo||'', ext.facebook||'', ext.note||'', c.type, c.orders, c.spent, c.last);
+    insertC2.run(c.name, c.phone, c.addr, ext.email||'', ext.birthday||'', ext.company_anniversary||'', ext.zalo||'', ext.facebook||'', ext.note||'', ext.source||'cua_hang', c.type, c.orders, c.spent, c.last);
   }
 
   // Blog posts
@@ -452,6 +465,37 @@ function seedDemoData() {
   insertV.run('ANNIV50K', 'fixed', 50000, 200000, 0, 0, 1, '2026-12-31');
   insertV.run('WEEKEND15', 'percent', 15, 0, 0, 0, 1, '2026-12-31');
 
+  // Accounting demo data — chi phí 30 ngày
+  const insertAcc = db.prepare('INSERT INTO accounting (date, type, category, description, amount, payment_method, note) VALUES (?,?,?,?,?,?,?)');
+  const accData = [
+    ['2026-03-01','expense','Nguyên liệu','Bơ Président 82% (10kg)','2500000','Chuyển khoản','NCC Pháp Foods'],
+    ['2026-03-01','expense','Nguyên liệu','Bột mì Cường lực (25kg)','450000','Tiền mặt',''],
+    ['2026-03-02','expense','Nguyên liệu','Matcha Uji Ceremonial (500g)','1200000','Chuyển khoản','Nhập Nhật'],
+    ['2026-03-03','expense','Nhân viên','Lương Chef Hà (T3)','12000000','Chuyển khoản',''],
+    ['2026-03-03','expense','Nhân viên','Lương Chef Lan (T3)','10000000','Chuyển khoản',''],
+    ['2026-03-03','expense','Nhân viên','Lương 2 PV bán hàng (T3)','14000000','Chuyển khoản','2 người x 7tr'],
+    ['2026-03-05','expense','Mặt bằng','Tiền thuê S2.15 Ocean Park (T3)','15000000','Chuyển khoản','HĐ 12 tháng'],
+    ['2026-03-05','expense','Điện nước','Tiền điện + nước T2','3200000','Tiền mặt',''],
+    ['2026-03-07','expense','Nguyên liệu','Socola Callebaut Bỉ (5kg)','1800000','Chuyển khoản',''],
+    ['2026-03-07','expense','Nguyên liệu','Kem whipping, sữa tươi, trứng','1500000','Tiền mặt','Mua hàng tuần'],
+    ['2026-03-10','expense','Marketing','Chạy ads Facebook (T3)','5000000','Chuyển khoản','Fanpage Hello Cake'],
+    ['2026-03-10','expense','Marketing','In standee + menu cho đối tác','2000000','Chuyển khoản','50 bộ'],
+    ['2026-03-12','expense','Nguyên liệu','Dâu tây Đà Lạt (5kg)','750000','Tiền mặt','Farm trực tiếp'],
+    ['2026-03-12','expense','Nguyên liệu','Xoài Cát Hòa Lộc (10kg)','600000','Tiền mặt',''],
+    ['2026-03-14','expense','Bao bì','Hộp bánh in logo (500 cái)','3500000','Chuyển khoản','NCC Tân Phú'],
+    ['2026-03-14','expense','Bao bì','Túi giấy Hello Cake (300 cái)','1800000','Chuyển khoản',''],
+    ['2026-03-15','expense','Thiết bị','Sửa lò nướng','1500000','Tiền mặt','Thay thanh nhiệt'],
+    ['2026-03-18','expense','Nguyên liệu','Bơ + Bột + Trứng (tuần 3)','2800000','Tiền mặt',''],
+    ['2026-03-20','expense','Vận chuyển','Phí ship GHN tháng 3','1200000','Chuyển khoản','~60 đơn ship'],
+    ['2026-03-22','expense','Nguyên liệu','Ruby chocolate Barry (2kg)','1400000','Chuyển khoản',''],
+    ['2026-03-25','expense','Nguyên liệu','Bơ + Sữa + Trái cây (tuần 4)','3200000','Tiền mặt',''],
+    ['2026-03-28','expense','Khác','Phí duy trì website + domain','350000','Chuyển khoản','hellocake.vn'],
+    ['2026-03-05','income','Thu khác','Thu phí đào tạo làm bánh (2 học viên)','3000000','Chuyển khoản','1.5tr/người'],
+    ['2026-03-15','income','Thu khác','Bán thiết bị cũ (máy đánh trứng)','800000','Tiền mặt',''],
+    ['2026-03-20','income','Thu khác','Thu phí standee đối tác','1000000','Chuyển khoản','Café Bình Minh'],
+  ];
+  for (const a of accData) insertAcc.run(...a);
+
   // Activity logs
   const insertLog = db.prepare('INSERT INTO activity_logs (type, message, created_at) VALUES (?, ?, ?)');
   insertLog.run('success', 'Hệ thống khởi tạo thành công', '2026-03-27 07:00:00');
@@ -545,10 +589,36 @@ app.get('/api/dashboard/revenue', (req, res) => {
 
   const avg = db.prepare(`SELECT COALESCE(AVG(total), 0) as avg_per_order FROM orders WHERE status IN ${validStatuses}`).get();
 
+  // Hôm nay realtime
+  const todayRevenue = db.prepare(`SELECT COALESCE(SUM(total),0) as total, COUNT(*) as orders FROM orders WHERE status IN ${validStatuses} AND date(created_at) = date('now')`).get();
+  const todayExpense = db.prepare(`SELECT COALESCE(SUM(amount),0) as total FROM accounting WHERE type='expense' AND date = date('now')`).get();
+  const todayProfit = todayRevenue.total - todayExpense.total;
+
+  // Chi phí theo ngày (từ kế toán)
+  const dailyExpense = db.prepare(`
+    SELECT date as day, COALESCE(SUM(amount), 0) as expense
+    FROM accounting WHERE type='expense' AND date >= date('now', '-${days} days')
+    GROUP BY date ORDER BY day
+  `).all();
+  const expenseByDay = {};
+  for (const e of dailyExpense) expenseByDay[e.day] = e.expense;
+  for (const d of daily) d.expense = expenseByDay[d.day] || 0;
+
+  // Chi phí theo tháng
+  const monthlyExpense = db.prepare(`
+    SELECT strftime('%Y-%m', date) as month, COALESCE(SUM(amount), 0) as expense
+    FROM accounting WHERE type='expense' AND date >= date('now', '-12 months')
+    GROUP BY strftime('%Y-%m', date) ORDER BY month
+  `).all();
+  const expenseByMonth = {};
+  for (const e of monthlyExpense) expenseByMonth[e.month] = e.expense;
+  for (const m of monthly) m.expense = expenseByMonth[m.month] || 0;
+
   res.json({
     daily, monthly,
     comparison: { ...comp, this_week: weeks.this_week, last_week: weeks.last_week },
-    avg_per_order: Math.round(avg.avg_per_order)
+    avg_per_order: Math.round(avg.avg_per_order),
+    today: { revenue: todayRevenue.total, orders: todayRevenue.orders, expense: todayExpense.total, profit: todayProfit }
   });
 });
 
@@ -797,6 +867,48 @@ app.get('/api/customers/reminders', (req, res) => {
   res.json(reminders);
 });
 
+// ── Customer Journey Analytics ──
+app.get('/api/dashboard/customer-journey', (req, res) => {
+  // Nguồn khách hàng
+  const sources = db.prepare(`
+    SELECT source, COUNT(*) as count,
+      SUM(total_spent) as revenue,
+      SUM(total_orders) as orders,
+      ROUND(AVG(total_spent)) as avg_clv
+    FROM customers WHERE source != '' GROUP BY source ORDER BY count DESC
+  `).all();
+
+  // Khách mới vs quay lại theo tháng
+  const monthlyJourney = db.prepare(`
+    SELECT strftime('%Y-%m', created_at) as month,
+      COUNT(*) as new_customers
+    FROM customers
+    WHERE created_at >= date('now', '-6 months')
+    GROUP BY strftime('%Y-%m', created_at) ORDER BY month
+  `).all();
+
+  // Tỉ lệ chuyển đổi: mới → quay lại
+  const conversion = db.prepare(`
+    SELECT
+      COUNT(*) as total,
+      SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as stayed_one,
+      SUM(CASE WHEN total_orders >= 2 THEN 1 ELSE 0 END) as came_back,
+      SUM(CASE WHEN total_orders >= 5 THEN 1 ELSE 0 END) as became_vip
+    FROM customers
+  `).get();
+
+  // Top nguồn có CLV cao nhất
+  const sourceQuality = db.prepare(`
+    SELECT source,
+      ROUND(AVG(total_spent)) as avg_clv,
+      ROUND(AVG(total_orders), 1) as avg_orders,
+      SUM(CASE WHEN total_orders >= 2 THEN 1 ELSE 0 END) * 100 / MAX(COUNT(*), 1) as retention_rate
+    FROM customers WHERE source != '' GROUP BY source ORDER BY avg_clv DESC
+  `).all();
+
+  res.json({ sources, monthlyJourney, conversion, sourceQuality });
+});
+
 // ── Blog ──
 app.get('/api/blog', (req, res) => {
   const { category, limit: lim } = req.query;
@@ -1016,6 +1128,65 @@ app.post('/api/crm/send-offer', (req, res) => {
 
   logActivity('success', `Gửi ưu đãi "${program.name}" qua ${channels.join(', ')} cho ${targets.length} khách (${segment})`);
   res.json({ sent: targets.length, segment, program: program.name, channels });
+});
+
+// ── Accounting ──
+app.get('/api/accounting', (req, res) => {
+  const { month } = req.query;
+  let query = 'SELECT * FROM accounting WHERE 1=1';
+  const params = [];
+  if (month) { query += " AND strftime('%Y-%m', date) = ?"; params.push(month); }
+  query += ' ORDER BY date DESC';
+  res.json(db.prepare(query).all(...params));
+});
+
+app.get('/api/accounting/summary', (req, res) => {
+  const { month } = req.query;
+  const mFilter = month ? `AND strftime('%Y-%m', date) = '${month}'` : '';
+
+  // Tổng doanh thu từ đơn hàng
+  const revenue = db.prepare(`SELECT COALESCE(SUM(total),0) as total FROM orders WHERE status IN ('Hoàn thành','Đang làm') ${month ? "AND strftime('%Y-%m', created_at) = '" + month + "'" : ''}`).get();
+
+  // Thu khác (income từ accounting)
+  const otherIncome = db.prepare(`SELECT COALESCE(SUM(amount),0) as total FROM accounting WHERE type='income' ${mFilter}`).get();
+
+  // Chi phí theo category
+  const expenses = db.prepare(`SELECT category, SUM(amount) as total FROM accounting WHERE type='expense' ${mFilter} GROUP BY category ORDER BY total DESC`).all();
+  const totalExpense = expenses.reduce((s, e) => s + e.total, 0);
+
+  // Tổng thu - tổng chi = lợi nhuận
+  const totalIncome = revenue.total + otherIncome.total;
+  const profit = totalIncome - totalExpense;
+  const profitMargin = totalIncome > 0 ? Math.round(profit / totalIncome * 100) : 0;
+
+  // Chi phí theo tháng (6 tháng gần nhất)
+  const monthlyExpenses = db.prepare(`SELECT strftime('%Y-%m', date) as month, SUM(amount) as total FROM accounting WHERE type='expense' GROUP BY strftime('%Y-%m', date) ORDER BY month DESC LIMIT 6`).all().reverse();
+
+  res.json({
+    revenue: revenue.total,
+    otherIncome: otherIncome.total,
+    totalIncome,
+    totalExpense,
+    profit,
+    profitMargin,
+    expensesByCategory: expenses,
+    monthlyExpenses
+  });
+});
+
+app.post('/api/accounting', (req, res) => {
+  const { date, type, category, description, amount, payment_method, note } = req.body;
+  if (!date || !description || !amount) return res.status(400).json({ error: 'Thiếu thông tin' });
+  const result = db.prepare('INSERT INTO accounting (date, type, category, description, amount, payment_method, note) VALUES (?,?,?,?,?,?,?)').run(
+    date, type || 'expense', category || 'Khác', description, amount, payment_method || 'Tiền mặt', note || ''
+  );
+  logActivity('info', `Kế toán: ${type === 'income' ? 'Thu' : 'Chi'} ${amount.toLocaleString('vi-VN')}đ — ${description}`);
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.delete('/api/accounting/:id', (req, res) => {
+  db.prepare('DELETE FROM accounting WHERE id = ?').run(req.params.id);
+  res.json({ success: true });
 });
 
 // ═══ START SERVER ═══

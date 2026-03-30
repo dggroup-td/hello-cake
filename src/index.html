@@ -3,11 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hello Cake — Bánh Tươi Handmade</title>
+<title>Hello Cake — Croissant & Tart Handmade Hà Nội | Tìm Đại Lý</title>
+<meta name="description" content="Croissant, Tart trái cây handmade tươi mỗi ngày tại Ocean Park, Hà Nội. Cung cấp sỉ cho quán café. Tuyển đại lý miền Bắc. Giao hàng từ 2 chiếc.">
+<meta name="keywords" content="croissant hà nội, bánh ngọt ocean park, tart trái cây, hello cake, bánh handmade, cung cấp sỉ bánh">
+<meta property="og:title" content="Hello Cake — Croissant & Tart Handmade Hà Nội">
+<meta property="og:description" content="Bánh tươi handmade mỗi ngày. Cung cấp sỉ, tuyển đại lý miền Bắc. Giao hàng từ 2 chiếc. ☎ 0869.120.122">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/images/slider/slide1.jpg">
+<meta property="og:locale" content="vi_VN">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Bakery","name":"Hello Cake","description":"Croissant & Tart handmade tươi mỗi ngày tại Ocean Park, Hà Nội","url":"https://hellocake.vn","telephone":"+84869120122","address":{"@type":"PostalAddress","streetAddress":"Toà S2.15 Ocean Park 1","addressLocality":"Gia Lâm","addressRegion":"Hà Nội","addressCountry":"VN"},"openingHours":"Mo-Su 09:00-22:30","priceRange":"49.000đ - 129.000đ","servesCuisine":"Bánh ngọt, Croissant, Tart","aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"328"}}
+</script>
 </head>
 <body>
 
@@ -37,7 +48,7 @@
     <a class="na" href="#" onclick="fCat('Đồ Uống');closeMobileMenu();return false">Đồ Uống</a>
     <a class="na" href="#" onclick="scrollToBlog();closeMobileMenu();return false">📖 Blog</a>
   </div>
-  <button class="n-adm" onclick="gAdmin()"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Quản lý</button>
+  <button class="n-adm" onclick="gAdmin()" title="Quản lý (Admin)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
 </div></nav>
 
 <!-- ═══════ SHOP PAGE ═══════ -->
@@ -248,7 +259,7 @@
 <footer class="footer"><div class="i">
   <div class="footer-b"><div class="fn">Hello Cake 🎂</div><p>📍 Toà S2.15 Ocean Park 1, Hà Nội<br>📞 0869.120.122<br>🕐 09:00–22:30 mỗi ngày<br>🚀 Ship từ 2 chiếc · Giao toàn quận</p></div>
   <div><h4>Thực đơn</h4><ul><li onclick="fCat('Croissant')">🥐 Croissant</li><li onclick="fCat('Tart')">🥧 Tart trái cây</li><li onclick="fCat('Bánh Mì')">🍞 Bánh Mì</li><li onclick="fCat('Đồ Uống')">🍵 Đồ Uống</li></ul></div>
-  <div><h4>Hỗ trợ</h4><ul><li>Chính sách giao hàng</li><li>Đổi trả sản phẩm</li><li>Hướng dẫn đặt hàng</li><li>Liên hệ chúng tôi</li></ul></div>
+  <div><h4>Hỗ trợ</h4><ul><li>Chính sách giao hàng</li><li>Đổi trả sản phẩm</li><li>Hướng dẫn đặt hàng</li><li class="footer-admin" onclick="gAdmin()">Quản trị viên</li></ul></div>
   <div><h4>Kết nối</h4><ul><li>Facebook</li><li>Instagram</li><li>TikTok</li><li>Zalo OA</li></ul></div>
 </div>
 <div class="fbtm"><span>© 2026 Hello Cake — Bánh tươi handmade mỗi ngày</span><div class="fsoc"><a href="#">f</a><a href="#">ig</a><a href="#">tt</a><a href="#">z</a></div></div>
@@ -264,6 +275,7 @@
     <div class="fg"><label>Mật khẩu</label><input type="password" id="admin-pw" placeholder="Nhập mật khẩu admin" onkeydown="if(event.key==='Enter')adminLogin()"></div>
     <button type="button" class="cfbtn" onclick="adminLogin()">🔐 Đăng nhập</button>
     <div id="admin-err" class="voucher-msg err"></div>
+    <button type="button" class="bkbtn" style="margin-top:8px" onclick="document.getElementById('pg-admin-login').classList.remove('show');document.getElementById('pg-shop').style.display='block'">← Quay lại trang chủ</button>
   </div>
 </div>
 
@@ -280,8 +292,10 @@
     <button class="atn" onclick="aTab('ord')">📦 Đơn hàng</button>
     <button class="atn" onclick="aTab('pro')">🛍 Sản phẩm</button>
     <button class="atn" onclick="aTab('cus')">👤 Khách hàng</button>
+    <button class="atn" onclick="aTab('journey')">🗺 Hành trình</button>
     <button class="atn" onclick="aTab('crm')">💝 CRM</button>
     <button class="atn" onclick="aTab('voucher')">🎫 Voucher</button>
+    <button class="atn" onclick="aTab('accounting')">📒 Kế toán</button>
     <button class="atn" onclick="aTab('api')">🔌 Kết nối</button>
     <button class="atn" onclick="aTab('db')">🗄 Database</button>
     <button class="atn" onclick="aTab('seo')">🔍 SEO</button>
@@ -341,6 +355,18 @@
     <button class="ctbtn" onclick="closeSuccess()">Tiếp tục mua hàng</button>
   </div>
 </div>
+
+<!-- Zalo Chat Button -->
+<a href="https://zalo.me/0869120122" target="_blank" rel="noopener" class="zalo-float" title="Chat Zalo">
+  <span class="zalo-icon">💬</span>
+  <span class="zalo-text">Zalo</span>
+</a>
+
+<!-- Scroll to Top -->
+<button type="button" class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Lên đầu trang">↑</button>
+
+<!-- Sticky Mini Cart -->
+<div class="sticky-cart" id="sticky-cart"></div>
 
 <!-- Send Offer Modal -->
 <div class="mow" id="send-modal">
