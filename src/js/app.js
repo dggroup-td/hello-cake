@@ -1026,17 +1026,30 @@ async function rPro() {
         }).join('')}
       </table></div>
       <div class="fp" id="fpn" style="display:none">
-        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:10px" id="fpt">Thêm sản phẩm mới</div>
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:10px">Thêm / Sửa sản phẩm</div>
         <div class="fpr">
-          <input id="pfn" placeholder="Tên sản phẩm">
+          <input id="pfn" placeholder="Tên sản phẩm (VD: Matcha Croissant)" style="flex:2">
           <select id="pfc"><option>Croissant</option><option>Bánh Mì</option><option>Tart</option><option>Đồ Uống</option></select>
         </div>
-        <div class="fpr">
+        <div class="fpr" style="margin-top:6px">
           <input id="pfp" placeholder="Giá bán (đ)" type="number">
           <input id="pfs" placeholder="Tồn kho" type="number">
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;cursor:pointer"><input type="checkbox" id="pfbs" style="accent-color:#2D6A4F"> Best Seller</label>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="svbtn" onclick="saveProduct()">💾 Lưu</button>
+        <div class="fpr" style="margin-top:6px">
+          <input id="pfimg" placeholder="Link ảnh sản phẩm (URL hoặc /images/products/ten-sp.jpg)" style="flex:2">
+        </div>
+        <div class="fpr" style="margin-top:6px">
+          <textarea id="pfdesc" placeholder="Mô tả sản phẩm: nguyên liệu, hương vị, điểm đặc biệt... (SEO: nên 50-150 từ)" style="width:100%;min-height:70px;resize:none;padding:8px;border:1.5px solid var(--bd);border-radius:7px;font-family:'Be Vietnam Pro',sans-serif;font-size:12px"></textarea>
+        </div>
+        <div style="background:#F4FBF7;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--tx3)">
+          <strong style="color:var(--tx)">💡 Mẹo SEO sản phẩm:</strong><br>
+          • Tên SP nên chứa từ khóa: "Croissant Matcha Hà Nội"<br>
+          • Mô tả 50-150 từ, nhắc nguyên liệu + vùng miền<br>
+          • Ảnh rõ nét, nền sáng, tỉ lệ 1:1 (vuông)
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="svbtn" onclick="saveProduct()">💾 Lưu sản phẩm</button>
           <button class="clbtn" onclick="document.getElementById('fpn').style.display='none'">Hủy</button>
         </div>
       </div>
@@ -1047,7 +1060,8 @@ function showAddProductForm() {
   setTimeout(() => {
     const el = document.getElementById('fpn');
     if (el) { el.style.display = 'block'; el.scrollIntoView({ behavior: 'smooth' }); }
-    ['pfn', 'pfp', 'pfs'].forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
+    ['pfn', 'pfp', 'pfs', 'pfimg', 'pfdesc'].forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
+    const bs = document.getElementById('pfbs'); if (bs) bs.checked = false;
   }, 50);
 }
 
@@ -1056,9 +1070,12 @@ async function saveProduct() {
   const category = document.getElementById('pfc')?.value;
   const price = parseInt(document.getElementById('pfp')?.value) || 0;
   const stock = parseInt(document.getElementById('pfs')?.value) || 0;
+  const is_bestseller = document.getElementById('pfbs')?.checked ? 1 : 0;
+  const image_url = document.getElementById('pfimg')?.value.trim() || '';
+  const description = document.getElementById('pfdesc')?.value.trim() || '';
   if (!name) { toast('Nhập tên sản phẩm!', 'error'); return; }
   if (!price) { toast('Nhập giá bán!', 'error'); return; }
-  await api('/products', { method: 'POST', body: { name, category, price, stock } });
+  await api('/products', { method: 'POST', body: { name, category, price, stock, is_bestseller, image_url, description } });
   products = await api('/products');
   toast('Thêm sản phẩm thành công!', 'success');
   rAdm();
