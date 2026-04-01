@@ -17,10 +17,12 @@
   "author": "Hello Cake",
   "license": "MIT",
   "dependencies": {
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "^11.7.0",
     "express": "^4.21.0",
     "multer": "^1.4.5-lts.1",
-    "open": "^10.1.0",
-    "sharp": "^0.34.5"
+    "open": "^10.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
